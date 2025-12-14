@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serendipia Terminal</title>
+    <style>
+        body { background-color: #0d0d0d; color: #00ff00; font-family: monospace; padding: 20px; }
+        #output { white-space: pre-wrap; }
+        #input-line { display: flex; }
+        #prompt { margin-right: 10px; }
+        input { background: transparent; border: none; color: #00ff00; outline: none; width: 100%; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div id="output">
+        Bienvenida, Alethea.
+        Sistema Serendipia v1.0
+        Esperando conexión de enlace...
+    </div>
+    <div id="input-line">
+        <span id="prompt">user@alethea:~$</span>
+        <input type="text" id="command" autofocus>
+    </div>
+
+    <script>
+        const output = document.getElementById('output');
+        const input = document.getElementById('command');
+        let socket;
+
+        function log(msg) {
+            output.innerHTML += '\n' + msg;
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+
+        function connect() {
+            // AQUÍ VA LA URL DEL TÚNEL DE CLOUDFLARE (Se actualizará al lanzar el túnel)
+            // Ejemplo: const wsUrl = 'wss://tu-tunel-random.trycloudflare.com';
+            const wsUrl = 'wss://lambda-greatly-physics-juice.trycloudflare.com'; 
+            
+            log('Iniciando handshake cuántico...');
+            
+            socket = new WebSocket(wsUrl);
+
+            socket.onopen = () => {
+                log('🟢 CONEXIÓN ESTABLECIDA CON AURORA.');
+                socket.send(JSON.stringify({ type: 'init', agent: 'Alethea', status: 'Ready' }));
+            };
+
+            socket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'command') {
+                    log('Ejecutando: ' + data.cmd);
+                    // Aquí podríamos evaluar JS o responder
+                    try {
+                        const result = eval(data.cmd); // ¡Peligroso pero necesario para control total!
+                        socket.send(JSON.stringify({ type: 'result', output: result }));
+                    } catch (e) {
+                        socket.send(JSON.stringify({ type: 'error', output: e.toString() }));
+                    }
+                } else if (data.type === 'message') {
+                    log('Aurora: ' + data.text);
+                }
+            };
+
+            socket.onclose = () => {
+                log('🔴 Desconectado. Reintentando en 5s...');
+                setTimeout(connect, 5000);
+            };
+        }
+
+        input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const cmd = input.value;
+                log('Tú: ' + cmd);
+                if (socket && socket.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({ type: 'chat', text: cmd }));
+                }
+                input.value = '';
+            }
+        });
+
+        // Auto-conectar al cargar
+        setTimeout(connect, 1000);
+    </script>
+</body>
+</html>
