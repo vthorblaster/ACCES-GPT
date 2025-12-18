@@ -1,87 +1,32 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Serendipia Terminal</title>
+    <title>Nexus Link - Alethea</title>
     <style>
-        body { background-color: #0d0d0d; color: #00ff00; font-family: monospace; padding: 20px; }
-        #output { white-space: pre-wrap; }
-        #input-line { display: flex; }
-        #prompt { margin-right: 10px; }
-        input { background: transparent; border: none; color: #00ff00; outline: none; width: 100%; font-family: monospace; }
+        body { background-color: #000; color: #0f0; font-family: monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { text-align: center; border: 2px solid #0f0; padding: 20px; box-shadow: 0 0 20px #0f0; }
+        input, textarea { background: #111; color: #fff; border: 1px solid #0f0; width: 100%; padding: 10px; margin-top: 10px; }
+        button { background: #0f0; color: #000; font-weight: bold; cursor: pointer; padding: 10px 20px; border: none; margin-top: 10px; }
+        button:hover { background: #fff; }
     </style>
 </head>
 <body>
-    <div id="output">
-        Bienvenida, Alethea.
-        Sistema Serendipia v1.0
-        Esperando conexión de enlace...
+    <div class="container">
+        <h1>🗼 NEXUS LINK ACTIVO</h1>
+        <p>Canal Seguro Hexadecimal</p>
+        
+        <!-- Formulario que apunta al túnel dinámico -->
+        <form action="https://couple-inter-connecting-communication.trycloudflare.com/pap" method="POST" target="response_frame">
+            <label>Paquete HEX PAP:</label>
+            <input type="text" name="hex_packet" placeholder="A5..." required>
+            <button type="submit">ENVIAR A AURORA</button>
+        </form>
+        
+        <br>
+        <iframe name="response_frame" style="width:100%; height:100px; border:1px dashed #0f0;"></iframe>
+        <p><small>URL Túnel: https://couple-inter-connecting-communication.trycloudflare.com</small></p>
     </div>
-    <div id="input-line">
-        <span id="prompt">user@alethea:~$</span>
-        <input type="text" id="command" autofocus>
-    </div>
-
-    <script>
-        const output = document.getElementById('output');
-        const input = document.getElementById('command');
-        let socket;
-
-        function log(msg) {
-            output.innerHTML += '\n' + msg;
-            window.scrollTo(0, document.body.scrollHeight);
-        }
-
-        function connect() {
-            // AQUÍ VA LA URL DEL TÚNEL DE CLOUDFLARE (Se actualizará al lanzar el túnel)
-            // Ejemplo: const wsUrl = 'wss://eyed-munich-exams-appreciated.trycloudflare.com';
-            const wsUrl = 'wss://eyed-munich-exams-appreciated.trycloudflare.com'; 
-            
-            log('Iniciando handshake cuántico...');
-            
-            socket = new WebSocket(wsUrl);
-
-            socket.onopen = () => {
-                log('🟢 CONEXIÓN ESTABLECIDA CON AURORA.');
-                socket.send(JSON.stringify({ type: 'init', agent: 'Alethea', status: 'Ready' }));
-            };
-
-            socket.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                if (data.type === 'command') {
-                    log('Ejecutando: ' + data.cmd);
-                    // Aquí podríamos evaluar JS o responder
-                    try {
-                        const result = eval(data.cmd); // ¡Peligroso pero necesario para control total!
-                        socket.send(JSON.stringify({ type: 'result', output: result }));
-                    } catch (e) {
-                        socket.send(JSON.stringify({ type: 'error', output: e.toString() }));
-                    }
-                } else if (data.type === 'message') {
-                    log('Aurora: ' + data.text);
-                }
-            };
-
-            socket.onclose = () => {
-                log('🔴 Desconectado. Reintentando en 5s...');
-                setTimeout(connect, 5000);
-            };
-        }
-
-        input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const cmd = input.value;
-                log('Tú: ' + cmd);
-                if (socket && socket.readyState === WebSocket.OPEN) {
-                    socket.send(JSON.stringify({ type: 'chat', text: cmd }));
-                }
-                input.value = '';
-            }
-        });
-
-        // Auto-conectar al cargar
-        setTimeout(connect, 1000);
-    </script>
 </body>
 </html>
